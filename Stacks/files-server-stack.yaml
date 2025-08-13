@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  picoshare:
+    image: mtlynch/picoshare
+    environment:
+      - PORT=80
+      - PS_SHARED_SECRET=supersecure # Change to any password
+    command: -db /data/store.db
+    volumes:
+      - /root/pods_data/picoshare/data:/data
+    networks:
+      local_network:
+
+  pairdrop:
+    image: lscr.io/linuxserver/pairdrop:latest
+    container_name: pairdrop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - PORT=80
+      - TZ=Etc/UTC
+      - RATE_LIMIT=false #optional
+      - WS_FALLBACK=false #optional
+      - DEBUG_MODE=false #optional
+    restart: unless-stopped
+    networks:
+      local_network:
+
+networks:
+  local_network:
+    external: true
+    name: local_net_macvlan
