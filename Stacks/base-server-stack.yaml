@@ -52,6 +52,7 @@ services:
     restart: unless-stopped
     networks:
       local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
 
 networks:
   local_network:

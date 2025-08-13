@@ -11,6 +11,7 @@ services:
       - /root/pods_data/picoshare/data:/data
     networks:
       local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
 
   pairdrop:
     image: lscr.io/linuxserver/pairdrop:latest
@@ -26,6 +27,7 @@ services:
     restart: unless-stopped
     networks:
       local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
 
 networks:
   local_network:
