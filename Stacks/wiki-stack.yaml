@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  wikidocs:
+    image: zavy86/wikidocs
+    container_name: wikidocs
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - 80:80
+    volumes:
+      - /root/pods_data/wiki/data:/datasets
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+networks:
+  local_network:
+    external: true
+    name: local_net_macvlan
