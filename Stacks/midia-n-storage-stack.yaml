@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  db:
+    image: mariadb:10.6
+    container_name: nextcloud-db
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    environment:
+      MYSQL_ROOT_PASSWORD: senha_root
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: senha_segura
+    volumes:
+      - /storage/pods_data/nextcloud/mysql:/var/lib/mysql
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+  app:
+    image: nextcloud
+    container_name: nextcloud
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: <Your Ip of Choise>
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: senha_segura
+    volumes:
+      - /storage/pods_data/nextcloud/html:/var/www/html
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+networks:
+  local_network:
+    external: true
+    name: local_net_macvlan
