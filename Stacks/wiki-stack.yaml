@@ -16,6 +16,21 @@ services:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
 
+  flame:
+    image: pawelmalak/flame:latest
+    container_name: flame
+    ports:
+      - "80:80"  # Porta padrão do Flame
+    volumes:
+      - /root/pods_data/flame/data:/app/data
+    environment:
+      - PASSWORD=changeme  # Senha para acessar a configuração
+      - PORT=80
+    restart: unless-stopped
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
 networks:
   local_network:
     external: true

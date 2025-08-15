@@ -11,6 +11,9 @@ services:
     security_opt:
       - apparmor=unconfined
     restart: unless-stopped
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
 
   pihole: # Local DNS Server
     container_name: pihole 
@@ -50,6 +53,33 @@ services:
       # Optional, if Pi-hole should get some more processing time
       - SYS_NICE
     restart: unless-stopped
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
+
+    #environment:
+      # Uncomment this if you want to change the location of
+      # the SQLite DB file within the container
+      # DB_SQLITE_FILE: "/data/database.sqlite"
+
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
+
+    volumes:
+      - /root/pods_data/nginx_npm/data:/data
+      - /root/pods_data/nginx_npm/letsencrypt:/etc/letsencrypt
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
