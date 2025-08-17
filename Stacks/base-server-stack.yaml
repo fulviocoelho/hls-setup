@@ -57,7 +57,6 @@ services:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
 
-
   nginx:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped

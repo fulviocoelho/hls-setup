@@ -1,0 +1,59 @@
+version: '3.8'
+
+volumes:
+  db_storage:
+  n8n_storage:
+
+services:
+  postgres:
+    image: postgres:11
+    container_name: n8n_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: n8n_root
+      POSTGRES_PASSWORD: MY_STRONG_PASSWORD
+      POSTGRES_DB: n8n
+    volumes:
+      - /root/pods_data/n8n_db/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "80:5678"
+    environment:
+      N8N_SECURE_COOKIE: "false"
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: <POSTGRE SQL IP>
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n_root
+      DB_POSTGRESDB_PASSWORD: MY_STRONG_PASSWORD
+      N8N_BASIC_AUTH_ACTIVE: "false"
+      N8N_HOST: n8n.lan
+      N8N_PROTOCOL: http
+      N8N_PORT: 80
+      WEBHOOK_TUNNEL_URL: http://n8n.lan/
+      GENERIC_TIMEZONE: America/Sao_Paulo
+    volumes:
+      - n8n_storage:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+networks:
+  local_network:
+    external: true
+    name: local_net_macvlan

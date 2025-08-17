@@ -36,6 +36,40 @@ services:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
 
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096" # Porta Web
+    volumes:
+      - /storage/pods_data/jellyfin/config:/config
+      - /storage/jelly_media/media:/media # Conteúdo de mídia compartilhado
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+  ftp:
+    image: delfer/alpine-ftp-server
+    container_name: ftp-server
+    restart: unless-stopped
+    ports:
+      - "21:21"     # Porta FTP padrão
+      - "21000-21010:21000-21010" # Portas para modo passivo
+    environment:
+      - USERS=admin|admin123|/media
+      # - ADDRESS=0.0.0.0 # substitua pelo IP local
+      - PASV_MIN_PORT=21000
+      - PASV_MAX_PORT=21010
+      - TZ=America/Sao_Paulo
+    volumes:
+      - /storage/jelly_media/media:/media # Mesma pasta do Jellyfin
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
 networks:
   local_network:
     external: true
