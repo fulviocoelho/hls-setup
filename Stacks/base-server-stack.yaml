@@ -8,6 +8,9 @@ services:
       - "61208:61208"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /run/udev:/run/udev:ro
+      - /etc/os-release:/etc/os-release:ro # Access host OS info
+      - /storage:/storage:ro # Monitor a specific data mount
     security_opt:
       - apparmor=unconfined
     restart: unless-stopped
