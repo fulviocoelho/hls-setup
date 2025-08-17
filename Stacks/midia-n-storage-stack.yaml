@@ -66,6 +66,7 @@ services:
       - TZ=America/Sao_Paulo
     volumes:
       - /storage/jelly_media/media:/media # Mesma pasta do Jellyfin
+      - /storage/ownfoil_games/games:/games # Mesma pasta do Ownfoil
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
@@ -87,6 +88,28 @@ services:
       - 6881:6881
       - 6881:6881/udp
     restart: unless-stopped
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+  
+  ownfoil:
+    container_name: ownfoil
+    image: a1ex4/ownfoil
+    environment:
+     # For write permission in config directory
+     - PUID=1000
+     - PGID=1000
+     # to create/update an admin user at startup
+     - USER_ADMIN_NAME=admin
+     - USER_ADMIN_PASSWORD=asdvnf!546
+     # to create/update a regular user at startup
+     - USER_GUEST_NAME=guest
+     - USER_GUEST_PASSWORD=oerze!@8981
+    volumes:
+      - /storage/ownfoil_games/games:/games
+      - /storage/pods_data/ownfoil/config:/app/config
+    ports:
+      - "8465:8465"
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
