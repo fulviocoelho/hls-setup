@@ -4,6 +4,13 @@ services:
   glances: # Hardware Dashboard
     image: nicolargo/glances
     command: sh -c "glances -w"
+    deploy:
+      resources:
+        limits:
+          memory: 500M
+        reservations:
+          cpus: '0.5'
+          memory: 300M
     ports:
       - "61208:61208"
     volumes:
@@ -21,6 +28,11 @@ services:
   pihole: # Local DNS Server
     container_name: pihole 
     image: pihole/pihole:latest
+    deploy:
+      resources:
+        reservations:
+          cpus: '1'
+          memory: 500M
     ports:
       # DNS Ports
       - "53:53/tcp"

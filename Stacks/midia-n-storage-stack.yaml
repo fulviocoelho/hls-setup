@@ -21,6 +21,10 @@ services:
     image: nextcloud
     container_name: nextcloud
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
     ports:
       - 8080:80
     depends_on:
@@ -40,6 +44,10 @@ services:
     image: jellyfin/jellyfin
     container_name: jellyfin
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
     ports:
       - "8096:8096" # Porta Web
     volumes:
