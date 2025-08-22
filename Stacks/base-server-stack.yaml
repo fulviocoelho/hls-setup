@@ -18,9 +18,13 @@ services:
       - /run/udev:/run/udev:ro
       - /etc/os-release:/etc/os-release:ro # Access host OS info
       - /storage:/storage:ro # Monitor a specific data mount
+      - /run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock:ro
     security_opt:
       - apparmor=unconfined
-    restart: unless-stopped
+    restart: unless-stopped    
+    pid: "host"
+    stdin_open: true
+    tty: true
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
