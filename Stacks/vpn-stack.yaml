@@ -1,0 +1,22 @@
+services:
+  tailscale:
+    image: tailscale/tailscale:stable
+    container_name: tailscale
+    hostname: tailscale-docker
+    restart: unless-stopped
+    privileged: true
+    environment:
+      TS_AUTHKEY: tskey-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   # coloque sua auth key aqui
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_EXTRA_ARGS: --advertise-exit-node --advertise-routes=<Your Network>
+    volumes:
+      - /root/pods_data/tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise>
+
+networks:
+  local_network:
+    external: true
+    name: local_net_macvlan
