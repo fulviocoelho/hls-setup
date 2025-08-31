@@ -53,6 +53,8 @@ services:
     volumes:
       - /storage/pods_data/jellyfin/config:/config
       - /storage/jelly_media/media:/media # Conteúdo de mídia compartilhado
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128 # Para uso de transcodificação com aceleração de Hardware Intel Quick Sync
     environment:
       - TZ=America/Sao_Paulo
     networks:
@@ -73,8 +75,10 @@ services:
       - PASV_MAX_PORT=21010
       - TZ=America/Sao_Paulo
     volumes:
-      - /storage/jelly_media/media:/media # Mesma pasta do Jellyfin
-      - /storage/ownfoil_games/games:/games # Mesma pasta do Ownfoil
+      - /storage/jelly_media/media:/media/jellyfin # Mesma pasta do Jellyfin
+      - /storage/ownfoil_games/games:/media/ownfoil # Mesma pasta do Ownfoil
+      - /storage/navidrome_media/media:/media/navidrome # Mesma pasta do Navidrome
+      - /storage/pods_data/booklore_media:/media/booklore # Mesma pasta do booklore
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
@@ -92,8 +96,6 @@ services:
     volumes:
       - /storage/pods_data/navidrome/data:/data
       - /storage/navidrome_media/media:/music:ro # Conteúdo de mídia compartilhado
-      # - /storage/jelly_media/media/Musica:/music:ro # Conteúdo de mídia compartilhado
-      # - "./music:/music:ro"
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
@@ -109,7 +111,8 @@ services:
       - TORRENTING_PORT=6881
     volumes:
       - /storage/pods_data/qbittorrent/config:/config
-      - /storage/jelly_media/media:/downloads #optional
+      - /storage/jelly_media/media:/downloads/jellyfin #optional
+      - /storage/navidrome_media/media:/downloads/navidrome #optional
     ports:
       - 8080:8080
       - 6881:6881
@@ -137,6 +140,60 @@ services:
       - /storage/pods_data/ownfoil/config:/app/config
     ports:
       - "8465:8465"
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+  booklore:
+    # Official Docker Hub image:
+    image: booklore/booklore:latest
+    # Or the GHCR image:
+    # image: ghcr.io/booklore-app/booklore:latest
+    container_name: booklore
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - DATABASE_URL=jdbc:mariadb://<Your Ip of Choise For MariaDb>:3306/booklore   # Only modify this if you're familiar with JDBC and your database setup
+      - DATABASE_USERNAME=booklore                          # Must match MYSQL_USER defined in the mariadb container
+      - DATABASE_PASSWORD=your_secure_password              # Use a strong password; must match MYSQL_PASSWORD defined in the mariadb container 
+      - BOOKLORE_PORT=80                                  # Port BookLore listens on inside the container; must match container port below
+      - SWAGGER_ENABLED=false                               # Enable or disable Swagger UI (API docs). Set to 'true' to allow access; 'false' to block access (recommended for production).
+    depends_on:
+      booklore_mariadb:
+        condition: service_healthy
+    ports:
+      - "80:80" # HostPort:ContainerPort → Keep both numbers the same, and also ensure the container port matches BOOKLORE_PORT, no exceptions. 
+                    # All three (host port, container port, BOOKLORE_PORT) must be identical for BookLore to function properly.
+                    # Example: To expose on host port 8080, set BOOKLORE_PORT=8080 and use "8080:8080". 
+    volumes:
+      - /storage/pods_data/booklore/data:/app/data       # Application data (settings, metadata, cache, etc.). Persist this folder to retain your library state across container restarts.
+      - /storage/pods_data/booklore_media/books:/books         # Primary book library folder. Mount your collection here so BookLore can access and organize your books.
+      - /storage/pods_data/booklore_media/bookdrop:/bookdrop   # BookDrop folder. Files placed here are automatically detected and prepared for import.
+    restart: unless-stopped
+    networks:
+      local_network:
+        ipv4_address: <Your Ip of Choise> #Optional
+
+  booklore_mariadb:
+    image: lscr.io/linuxserver/mariadb:11.4.5
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - MYSQL_ROOT_PASSWORD=super_secure_password  # Use a strong password for the database's root user, should be different from MYSQL_PASSWORD
+      - MYSQL_DATABASE=booklore
+      - MYSQL_USER=booklore                        # Must match DATABASE_USERNAME defined in the booklore container
+      - MYSQL_PASSWORD=your_secure_password        # Use a strong password; must match DATABASE_PASSWORD defined in the booklore container
+    volumes:
+      - /storage/pods_data/booklore/mariadb/config:/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       local_network:
         ipv4_address: <Your Ip of Choise> #Optional
